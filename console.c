@@ -1653,20 +1653,8 @@ static void console_putchar(TextConsole *s, int ch)
 		    }
 		    mbrtowc(&wc, s->unicodeData, s->unicodeLength, NULL);
                     switch (s->unicodeLength) {
-                        case 2:
-                           ch = (s->unicodeData[0] & 0x1f);
-                            break;
-                        case 3:
-                           ch = (s->unicodeData[0] & 0x0f);
-                            break;
-                        case 4:
-                           ch = (s->unicodeData[0] & 0x07);
-                            break;
-                        case 5:
-                            ch = (s->unicodeData[0] & 0x03);
-                            break;
-                        case 6:
-                            ch = (s->unicodeData[0] & 0x01);
+                        case 2 ... 6:
+                            ch = (s->unicodeData[0] & (0x7f >> s->unicodeLength));
                             break;
                         default:
                             dprintf("bogus unicode length %u\n", s->unicodeLength);
@@ -1674,8 +1662,8 @@ static void console_putchar(TextConsole *s, int ch)
                             return;
                         break;
                     }
-                    for (i = 1; i <= s->unicodeLength - 1; i++) {
-                        ch = (ch << 6) + (s->unicodeData[i] & 0x3f);
+                    for (i = 1; i < s->unicodeLength; i++) {
+                        ch = (ch << 6) | (s->unicodeData[i] & 0x3f);
                     } 
                     s->unicodeIndex = 0;
                     ch = get_glyphcode(s, ch);
@@ -1684,42 +1672,30 @@ static void console_putchar(TextConsole *s, int ch)
 		}
                 /* multibyte sequence */
 		else if (ch > 0x7f) {
+                    memset(s->unicodeData, '\0', 7);
+                    s->unicodeData[0] = ch;
+                    s->unicodeIndex = 1;
                     if ((ch & 0xe0) == 0xc0) {
-                        memset(s->unicodeData, '\0', 7);
-			s->unicodeData[0] = ch;
-			s->unicodeIndex = 1;
 			s->unicodeLength = 2;
 			return;
 		    } 
 		    else
 		    if ((ch & 0xf0) == 0xe0) {
-                        memset(s->unicodeData, '\0', 7);
-			s->unicodeData[0] = ch;
-			s->unicodeIndex = 1;
 			s->unicodeLength = 3;
 			return;
 		    } 
 		    else
 		    if ((ch & 0xf8) == 0xf0) {
-                        memset(s->unicodeData, '\0', 7);
-			s->unicodeData[0] = ch;
-			s->unicodeIndex = 1;
 			s->unicodeLength = 4;
 			return;
 		    }
                     else
                     if ((ch & 0xfc) == 0xf8) {
-                        memset(s->unicodeData, '\0', 7);
-                        s->unicodeData[0] = ch;
-			s->unicodeIndex = 1;
 			s->unicodeLength = 5;
                         return;
                     }
                     else
                     if ((ch & 0xfe) == 0xfc) {
-                        memset(s->unicodeData, '\0', 7);
-                        s->unicodeData[0] = ch;
-			s->unicodeIndex = 1;
 			s->unicodeLength = 6;
                         return;
                     } else {
