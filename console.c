@@ -767,6 +767,7 @@ static void set_cursor(TextConsole *s, int x, int y)
     s->y = y;
     s->wrapped = 0;
     s->x = x;
+    clip_xy(s, x, y);
 }
 
 static void console_show_cursor(TextConsole *s, int show)
@@ -1217,10 +1218,11 @@ static void console_put_lf(TextConsole *s)
 {
     scroll_to_base(s);
 
-    set_cursor(s, s->x, s->y + 1);
-    if (s->y > s->sr_bottom) {
-        set_cursor(s, s->x, s->sr_bottom);
+    if (s->y + 1 > s->sr_bottom) {
 	scroll_up(s, 1);
+        set_cursor(s, s->x, s->sr_bottom);
+    } else {
+        set_cursor(s, s->x, s->y + 1);
     }
 }
 
@@ -1231,10 +1233,11 @@ static void console_put_cr(TextConsole *s)
 
 static void console_put_ri(TextConsole *s)
 {
-    set_cursor(s, s->x, s->y - 1);
-    if (s->y < s->sr_top) {
-	set_cursor(s, s->x, s->sr_top);
+    if (s->y - 1 < s->sr_top) {
 	scroll_down(s, 1);
+	set_cursor(s, s->x, s->sr_top);
+    } else {
+        set_cursor(s, s->x, s->y - 1);
     }
 }
 
@@ -1571,8 +1574,7 @@ static void console_putchar(TextConsole *s, int ch)
             break;
         case BS:
 	    dprintf("BS\n");
-            if (s->x > 0) 
-                set_cursor(s, s->x - 1, s->y);
+            set_cursor(s, s->x - 1, s->y);
             break;
         case HT:
 	    dprintf("HT\n");
@@ -1859,8 +1861,6 @@ static void console_putchar(TextConsole *s, int ch)
 		a = s->nb_esc_params ? s->esc_params[0] : 1;
 		dprintf("cursor right %d\n", a);
 		set_cursor(s, s->x + a, s->y);
-		if (s->x >= s->width)
-		    set_cursor(s, s->width - 1, s->y);
                 break;
             case 'D': /* cursor left */
 		if (s->esc_params[0] == 0)
@@ -1868,8 +1868,6 @@ static void console_putchar(TextConsole *s, int ch)
 		a = s->nb_esc_params ? s->esc_params[0] : 1;
 		dprintf("cursor left %d\n", a);
 		set_cursor(s, s->x - a, s->y);
-		if (s->x < 0)
-		    set_cursor(s, 0, s->y);
                 break;
 	    case 'E': /* cursor down and to first column */
 		if (s->esc_params[0] == 0)
@@ -1896,7 +1894,6 @@ static void console_putchar(TextConsole *s, int ch)
 			s->esc_params[0] = 1;
 		    dprintf("set cursor x %d\n", s->esc_params[0] - 1);
 		    set_cursor(s, s->esc_params[0] - 1, s->y);
-		    clip_x(s, x);
 		}
 		break;
 	    case 'f':
@@ -1911,7 +1908,6 @@ static void console_putchar(TextConsole *s, int ch)
 			s->esc_params[0] = 1;
 		    y_ = s->esc_params[0] - 1;
 		set_cursor(s, x_,  (s->origin_mode ? s->sr_top : 0) + y_);
-		clip_xy(s, x, y);
 		dprintf("cursor pos %d:%d\n", s->y, s->x);
 		break;
 	    case 'J': /* eraseInDisplay */
