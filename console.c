@@ -1822,6 +1822,8 @@ static void console_putchar(TextConsole *s, int ch)
 		if (s->esc_params[0] == 0)
 		    s->esc_params[0] = 1;
 		a = s->nb_esc_params ? s->esc_params[0] : 1;
+		if (a > s->width - 1)
+		    a = s->width - 1;
 		d = &s->cells[y1 * s->width + s->width - 1 - a];
 		for (x = s->width - 1; x >= s->x + a; x--) {
 		    c->ch = d->ch;
