@@ -87,7 +87,7 @@ enum TTYState {
     TTY_STATE_G1,
     TTY_STATE_CSI,
     TTY_STATE_NONSTD,
-    TTY_STATE_PALETTE
+    TTY_STATE_PALETTE,
 /*
 XXX to be done
     TTY_STATE_HASH,
@@ -95,6 +95,7 @@ XXX to be done
     TTY_STATE_GETPARS,
     TTY_STATE_GOTPARS,
 */
+    TTY_STATE_MAX = TTY_STATE_PALETTE
 };
 
 struct stream_chunk
@@ -2366,6 +2367,17 @@ void dump_console_to_file(CharDriverState *chr, char *fn)
     fclose(f);
 }
 
+static int clip_to(int value, int from, int to)
+{
+    if (value < from)
+        value = from;
+    if (value > to)
+        value = to;
+    return value;
+}
+
+#define clip_to(value, a, b) do { (value) = clip_to((value), a, b); } while(0)
+
 void load_console_from_file(CharDriverState *chr, char *fn)
 {
     FILE* f;
@@ -2384,6 +2396,10 @@ void load_console_from_file(CharDriverState *chr, char *fn)
     fread(&(s->g_width), sizeof(int), 1, f);
     fread(&(s->g_height), sizeof(int), 1, f);
     fread(&(s->total_height), sizeof(int), 1, f);
+
+    clip_to(s->g_width, FONT_WIDTH*2, FONT_WIDTH*1600);
+    clip_to(s->g_height, FONT_HEIGHT*2, FONT_HEIGHT*500);
+    clip_to(s->total_height, s->g_height / FONT_HEIGHT, 8192);
     
     text_console_resize(s);
     
@@ -2422,6 +2438,28 @@ void load_console_from_file(CharDriverState *chr, char *fn)
     fread(s->unicodeData, sizeof(char), 7, f);
     fread(&(s->unicodeLength), sizeof(int), 1, f);
     fclose(f);
+
+    /* sanitize values */
+    clip_to(s->unicodeLength, 0, sizeof(s->unicodeData));
+    clip_to(s->unicodeIndex, 0, s->unicodeLength);
+    clip_to(s->sr_bottom, 0, s->height - 1);
+    clip_to(s->sr_top, 0, s->height - 1);
+    clip_to(s->y_base, 0, s->total_height);
+    clip_to(s->backscroll, 0, s->total_height - s->height);
+    clip_to(s->y_scroll, 0, s->backscroll);
+    clip_to(s->x, 0, s->width - 1);
+    clip_to(s->y, 0, s->height - 1);
+    clip_to(s->saved_x, 0, s->width - 1);
+    clip_to(s->saved_y, 0, s->height - 1);
+    clip_to(s->mouse_x, -1, s->width - 1);
+    clip_to(s->mouse_y, -1, s->height - 1);
+    clip_to(s->cursor_visible, 0, 1);
+    clip_to(s->autowrap, 0, 1);
+    clip_to(s->insert_mode, 0, 1);
+    clip_to(s->nb_esc_params, 0, MAX_ESC_PARAMS);
+    clip_to(s->has_esc_param, 0, 1);
+    clip_to(s->has_qmark, 0, 1);
+    clip_to(s->state, 0, TTY_STATE_MAX);
 }
 
 /* called when an ascii key is pressed */
