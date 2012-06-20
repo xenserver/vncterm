@@ -1961,22 +1961,17 @@ static void console_putchar(TextConsole *s, int ch)
 		console_dch(s);
 		break;
             case 'X':		/* ECH - erase character */
-            {
-                int i = 0, a, nc = 0;
-                TextCell *c = &s->cells[screen_to_virtual(s,s->y) * s->width + s->x]; 
+		c = &s->cells[screen_to_virtual(s,s->y) * s->width];
 		if (s->esc_params[0] == 0)
 		    s->esc_params[0] = 1;
 		a = s->esc_params[0];
-		while (c->c_attrib.spanned) 
-		    c--;
-		while (i < a) {
-		    nc = nc + c->c_attrib.columns;
-		    c = c + c->c_attrib.columns;
-		    i++;
-		}
-		clear(s, s->x, s->y, s->x + nc, 1);
+		for (x = s->x; x > 0 && c[x].c_attrib.spanned; --x)
+		    continue;
+		for (; a > 0 && x < s->width; --a)
+		    x += c[x].c_attrib.columns;
+		/* does not test if x >= s->width as clear already clip x values*/
+		clear(s, s->x, s->y, x, 1);
                 break;
-            }
 	    case 'c': /* device attributes */
 		if (s->nb_esc_params == 0 )
                     va_write(s, "\033[?6c"); // I'm a VT102
