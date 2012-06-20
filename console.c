@@ -1426,6 +1426,11 @@ static void do_putchar_utf(TextConsole *s, wchar_t ch, char glyph)
     nc = wcwidth(ch);
     dprintf("utf-8: %d columns char\n", nc);
     if (nc < 0) nc = 1;
+    /* assure we have enough space to put our character, do no split in two lines */
+    if (s->x + nc > s->width) {
+	set_cursor(s, 0, s->y);
+	console_put_lf(s);
+    }
     for (i = 0; i < nc; i++) {
         put_norm(s, glyph);
         c = &s->cells[screen_to_virtual(s, s->y) * s->width + s->x + i];
