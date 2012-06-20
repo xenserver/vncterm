@@ -1476,14 +1476,14 @@ static int handle_params(TextConsole *s, int ch)
 
     dprintf("putchar csi %02x '%c'\n", ch, ch > 0x1f ? ch : ' ');
     if (ch >= '0' && ch <= '9') {
-	if (s->nb_esc_params < MAX_ESC_PARAMS && (s->esc_params[s->nb_esc_params] < 5000)) {
+	if (s->nb_esc_params < MAX_ESC_PARAMS && (s->esc_params[s->nb_esc_params] < 10000)) {
 	    s->esc_params[s->nb_esc_params] = 
 		s->esc_params[s->nb_esc_params] * 10 + ch - '0';
 	}
 	s->has_esc_param = 1;
 	return 0;
     } else {
-	if (s->has_esc_param && s->nb_esc_params < MAX_ESC_PARAMS-1)
+	if (s->has_esc_param && s->nb_esc_params < MAX_ESC_PARAMS)
 	    s->nb_esc_params++;
 	s->has_esc_param = 0;
 	if (ch == '?') {
@@ -1509,6 +1509,7 @@ static void reset_params(TextConsole *s)
 
     for(i=0;i<MAX_ESC_PARAMS;i++)
 	s->esc_params[i] = 0;
+    s->has_esc_param = 0;
     s->nb_esc_params = 0;
     s->has_qmark = 0;
 }
@@ -1750,6 +1751,7 @@ static void console_putchar(TextConsole *s, int ch)
 	    set_cursor(s, 0, 0);
 	    s->display_ctrl = 0;
 	    s->toggle_meta = 0;
+	    s->has_esc_param = 0;
 	    s->nb_esc_params = 0;
             s->t_attrib = s->t_attrib_default;
 	    /* reset any highlighted area */
