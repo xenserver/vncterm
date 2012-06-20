@@ -987,23 +987,23 @@ static void clear(TextConsole *s, int from_x, int start_y, int to_x, int height)
 /* this just scrolls view */
 static void console_scroll(TextConsole *s, int ydelta)
 {
+    int y_scroll;
+
     if (!s || !s->text_console)
         return;
 
-    s->y_scroll += -ydelta;
+    y_scroll = s->y_scroll - ydelta;
 
-    if (s->y_scroll > s->backscroll) {
-	ydelta += (s->y_scroll - s->backscroll);
-	s->y_scroll = s->backscroll;
-    }
+    if (y_scroll > s->backscroll)
+	y_scroll = s->backscroll;
 
-    if (s->y_scroll < 0 ) {
-	ydelta += s->y_scroll;
-	s->y_scroll = 0;
-    }
+    if (y_scroll < 0)
+	y_scroll = 0;
 
+    ydelta = s->y_scroll - y_scroll;
     if (ydelta == 0)
 	return;
+    s->y_scroll = y_scroll;
 
     if (abs(ydelta) < s->height) {
 	vga_scroll(s, ydelta);
@@ -1588,11 +1588,12 @@ static void console_putchar(TextConsole *s, int ch)
             break;
         case HT:
 	    dprintf("HT\n");
-            if (s->x + (8 - (s->x % 8)) > s->width) {
+	    x = s->x + (8 - (s->x % 8));
+            if (x > s->width) {
                 set_cursor(s, 0, s->y);
                 console_put_lf(s);
             } else {
-                set_cursor(s, s->x + (8 - (s->x % 8)), s->y);
+                set_cursor(s, x, s->y);
             }
             break;
         case LF:
