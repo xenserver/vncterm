@@ -1555,8 +1555,7 @@ static void console_dch(TextConsole *s)
 static void console_putchar(TextConsole *s, int ch)
 {
     TextCell *c, *d;
-    int y1, i, x, x1, a;
-    int x_, y_;
+    int i, x, y, x1, y1, a;
 
     dprintf("putchar %02x '%c' state:%d\n", ch, ch > 0x1f ? ch : ' ', s->state);
     if (s->unicodeIndex > 0 && (ch & 0xc0) == 0x80) goto unicode;
@@ -1900,16 +1899,13 @@ static void console_putchar(TextConsole *s, int ch)
 		break;
 	    case 'f':
 	    case 'H': /* cursor position */
-		x_ = y_ = 0;
-		if (s->nb_esc_params > 1)
-		    if (s->esc_params[1] == 0)
-			s->esc_params[1] = 1;
-		    x_ = s->esc_params[1] - 1;
-		if (s->nb_esc_params > 0)
-		    if (s->esc_params[0] == 0)
-			s->esc_params[0] = 1;
-		    y_ = s->esc_params[0] - 1;
-		set_cursor(s, x_,  (s->origin_mode ? s->sr_top : 0) + y_);
+		x = s->esc_params[1];
+		if (x == 0)
+		    x = 1;
+		y = s->esc_params[0];
+		if (y == 0)
+		    y = 1;
+		set_cursor(s, x,  (s->origin_mode ? s->sr_top : 0) + y);
 		dprintf("cursor pos %d:%d\n", s->y, s->x);
 		break;
 	    case 'J': /* eraseInDisplay */
