@@ -130,6 +130,7 @@ write_or_chunk(struct chunked_stream *s, uint8_t *buf, int len)
 	} else
 	    break;
     }
+    done = 0;
     if (s->chunk == NULL) {
 	done = write(s->fd, buf, len);
         if (done < 0) return; /* XXX error */
