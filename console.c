@@ -1829,6 +1829,8 @@ static void console_putchar(TextConsole *s, int ch)
 		    s->esc_params[0] = 1;
 		a = s->nb_esc_params ? s->esc_params[0] : 1;
 		dprintf("cursor up %d\n", a);
+		if (a > s->y)
+		    a = s->y;
 		set_cursor(s, s->x, s->y - a);
 		if (s->y < s->sr_top)
 		    set_cursor(s, s->x, s->sr_top);
