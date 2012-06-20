@@ -1464,14 +1464,14 @@ static int handle_params(TextConsole *s, int ch)
 
     dprintf("putchar csi %02x '%c'\n", ch, ch > 0x1f ? ch : ' ');
     if (ch >= '0' && ch <= '9') {
-	if (s->nb_esc_params < MAX_ESC_PARAMS) {
+	if (s->nb_esc_params < MAX_ESC_PARAMS && (s->esc_params[s->nb_esc_params] < 5000)) {
 	    s->esc_params[s->nb_esc_params] = 
 		s->esc_params[s->nb_esc_params] * 10 + ch - '0';
 	}
 	s->has_esc_param = 1;
 	return 0;
     } else {
-	if (s->has_esc_param)
+	if (s->has_esc_param && s->nb_esc_params < MAX_ESC_PARAMS-1)
 	    s->nb_esc_params++;
 	s->has_esc_param = 0;
 	if (ch == '?') {
@@ -1886,6 +1886,8 @@ static void console_putchar(TextConsole *s, int ch)
 	    case '`': /* fallthrough */
 	    case 'G':
 		if (s->nb_esc_params == 1) {
+		    if (s->esc_params[0] == 0)
+			s->esc_params[0] = 1;
 		    dprintf("set cursor x %d\n", s->esc_params[0] - 1);
 		    set_cursor(s, s->esc_params[0] - 1, s->y);
 		    clip_x(s, x);
@@ -1895,8 +1897,12 @@ static void console_putchar(TextConsole *s, int ch)
 	    case 'H': /* cursor position */
 		x_ = y_ = 0;
 		if (s->nb_esc_params > 1)
+		    if (s->esc_params[1] == 0)
+			s->esc_params[1] = 1;
 		    x_ = s->esc_params[1] - 1;
 		if (s->nb_esc_params > 0)
+		    if (s->esc_params[0] == 0)
+			s->esc_params[0] = 1;
 		    y_ = s->esc_params[0] - 1;
 		set_cursor(s, x_,  (s->origin_mode ? s->sr_top : 0) + y_);
 		clip_xy(s, x, y);
@@ -1974,7 +1980,9 @@ static void console_putchar(TextConsole *s, int ch)
 		break;
 	    case 'd':
 		if (s->nb_esc_params == 1) {
-		    set_cursor(s, s->x, s->esc_params[0]-1);
+		    if (s->esc_params[0] == 0)
+			s->esc_params[0] = 1;
+		    set_cursor(s, s->x, s->esc_params[0] - 1);
 		}
 		break;
 	    case 'e':
@@ -2068,6 +2076,10 @@ static void console_putchar(TextConsole *s, int ch)
 		    s->sr_top = 0;
 		    s->sr_bottom = s->height - 1;
 		} else if (s->nb_esc_params == 2) {
+		    if (s->esc_params[0] == 0)
+			s->esc_params[0] = 1;
+		    if (s->esc_params[1] == 0)
+			s->esc_params[1] = 1;
 		    s->sr_top = s->esc_params[0] - 1;
 		    s->sr_bottom = s->esc_params[1] - 1;
 		    clip_xy(s, sr_top, sr_bottom);
