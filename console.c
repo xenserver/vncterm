@@ -553,15 +553,20 @@ static void vga_scroll(TextConsole *s, int n)
 {
     int h;
 
-    h = s->g_height-(abs(n)*FONT_HEIGHT);
-
     if (n>0) {	// up
-	vga_bitblt(s->ds, 0, n*FONT_HEIGHT, 0, 0, s->g_width, h );
-	vga_fill_rect(s->ds, 0, h, s->g_width, (abs(n)*FONT_HEIGHT), s->t_attrib.bgcol);
+        if (n > s->height) n = s->height;
+        n *= FONT_HEIGHT;
+        h = s->g_height - n;
+	vga_bitblt(s->ds, 0, n, 0, 0, s->g_width, h);
+	vga_fill_rect(s->ds, 0, h, s->g_width, n, s->t_attrib.bgcol);
     }
     else {	// down
-	vga_bitblt(s->ds, 0, 0, 0, -n*FONT_HEIGHT, s->g_width, h );
-	vga_fill_rect(s->ds, 0, 0, s->g_width, (abs(n)*FONT_HEIGHT), s->t_attrib.bgcol);
+        n = -n;
+        if (n > s->height) n = s->height;
+        n *= FONT_HEIGHT;
+        h = s->g_height - n;
+	vga_bitblt(s->ds, 0, 0, 0, n, s->g_width, h);
+	vga_fill_rect(s->ds, 0, 0, s->g_width, n, s->t_attrib.bgcol);
     }
 }
 
