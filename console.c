@@ -1515,42 +1515,39 @@ static void reset_params(TextConsole *s)
 
 static void console_dch(TextConsole *s)
 {
-    TextCell *c, *d, *t;
-    int x, a, nc, i;
+    TextCell *row;
+    int x, nc;
 
-    if (s->esc_params[0] == 0)
-	s->esc_params[0] = 1;
-    a = s->nb_esc_params ? s->esc_params[0] : 1;
+    nc = s->esc_params[0];
+    if (nc == 0)
+	nc = 1;
 
-    c = &s->cells[screen_to_virtual(s,s->y) * s->width + s->x];
-    d = c+a;
-    
-    nc = 0;
-    i = 0;
-    t = c;
-    while (t->c_attrib.spanned) { 
-        t--;
-        c--;
-    }
-    while (i < a) {
-        nc = nc + t->c_attrib.columns;
-        t = t + t->c_attrib.columns;
-        i++;
-    }
-    for(x = s->x; x < s->width - nc; x++) {
-	c->ch = d->ch;
-	c->t_attrib = d->t_attrib;
-	c++;
-	d++;
+    row = &s->cells[screen_to_virtual(s,s->y) * s->width];
+
+    /* move to first column of current character */
+    for (x = s->x; x > 0 && row[x].c_attrib.spanned; --x)
+        continue;
+
+    /* skip nc characters */
+    for (; nc > 0 && x < s->width; --nc)
+        x += row[x].c_attrib.columns;
+
+    /* compute as many columns we skipped */
+    if (x > s->width)
+        x = s->width - 1;
+    nc = x - s->x;
+
+    for (x = s->x; x + nc < s->width; ++x) {
+        row[x].ch = row[x + nc].ch;
+	row[x].t_attrib = row[x + nc].t_attrib;
 	update_xy(s, x, s->y);
     }
     for (; x < s->width; x++) {
-        c->ch = ' ';
-        c->t_attrib = s->t_attrib_default;
-        c->t_attrib.fgcol = s->t_attrib.fgcol;
-        c->t_attrib.bgcol = s->t_attrib.bgcol;
-        c->c_attrib.wrapped = s->c_attrib_default.wrapped;
-        c++;
+        row[x].ch = ' ';
+        row[x].t_attrib = s->t_attrib_default;
+        row[x].t_attrib.fgcol = s->t_attrib.fgcol;
+        row[x].t_attrib.bgcol = s->t_attrib.bgcol;
+        row[x].c_attrib.wrapped = s->c_attrib_default.wrapped;
         update_xy(s, x, s->y);
     }
 }
