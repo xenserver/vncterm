@@ -950,11 +950,11 @@ static void clear_line(TextConsole *s, int line, int from_x, int to_x)
     TextCell *c;
     int m_fy, i;
 
-    if (to_x <= from_x)
-	return;
-
     if (to_x > s->width)
 	to_x = s->width;
+
+    if (0 > from_x || from_x >= to_x)
+	return;
 
     m_fy = screen_to_virtual(s, line);
     c = &s->cells[(m_fy * s->width)+from_x];
