@@ -965,6 +965,8 @@ static void clear_line(TextConsole *s, int line, int from_x, int to_x)
 	c->t_attrib.fgcol = s->t_attrib.fgcol;
 	c->t_attrib.bgcol = s->t_attrib.bgcol;
         c->c_attrib.wrapped = s->c_attrib_default.wrapped;
+        c->c_attrib.columns = 1;
+        c->c_attrib.spanned = 0;
 	c++;
    }
 
