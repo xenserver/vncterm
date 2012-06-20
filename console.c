@@ -1017,6 +1017,9 @@ static void scroll_text_cells(TextConsole* s, int f, int t, int by)
     TextCell* fc, *tc;
     int m_fy, m_ty, direction;
 
+    /* prevent zero division*/
+    if (by == 0) return;
+
     direction = by/abs(by);
     by = abs(by);
 
