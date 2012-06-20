@@ -2189,7 +2189,8 @@ static void console_putchar(TextConsole *s, int ch)
                 g += s->palette_params[j++];
                 b = 16 * s->palette_params[j++];
                 b += s->palette_params[j];
-                *(color_table[0] + s->palette_params[0]) = col_expand(s->ds, vga_get_color(s->ds, QEMU_RGB(r, g, b)));
+		if (s->palette_params[0] < 8)
+	                color_table[0][s->palette_params[0]] = col_expand(s->ds, vga_get_color(s->ds, QEMU_RGB(r, g, b)));
                 s->state = TTY_STATE_NORM; 
             }
         } else
