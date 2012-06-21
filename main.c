@@ -953,6 +953,15 @@ main(int argc, char **argv, char **envp)
             rlim.rlim_max = 64 * 1024 * 1024 + 64;
             setrlimit(RLIMIT_FSIZE, &rlim);
 
+            /* limit memory ro 32MB */
+            rlim.rlim_cur = 32 * 1024 * 1024;
+            rlim.rlim_max = 32 * 1024 * 1024;
+            setrlimit(RLIMIT_AS, &rlim);
+
+            rlim.rlim_cur = 256;
+            rlim.rlim_max = 256;
+            setrlimit(RLIMIT_NOFILE, &rlim);
+
             chdir(root_directory);
             chroot(root_directory);
 
@@ -1096,6 +1105,10 @@ main(int argc, char **argv, char **envp)
 	    err(1, "select failed");
 #endif
 	}
+
+        /* prevent DoS */
+        alarm(20);
+
 	if (ret == 0) {
 	    now = get_clock();
 	    while (timers && timers->timeout < now) {
@@ -1150,6 +1163,8 @@ main(int argc, char **argv, char **envp)
 		    ioh->fd_read(ioh->opaque);
 	    }
 	}
+
+        alarm(0);
     }
 
     return 0;
