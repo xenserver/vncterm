@@ -1141,8 +1141,12 @@ mouse_event(int dx, int dy, int dz, int buttons_state, void *opaque)
 	    text = get_text(s, s->selections[0].startx, s->selections[0].starty,
 			   s->selections[0].endx, s->selections[0].endy);
 
-	    if ( text != NULL && strlen(text) )
-		s->ds->dpy_set_server_text(s->ds, text);
+	    if (text != NULL) {
+		if (strlen(text))
+		    s->ds->dpy_set_server_text(s->ds, text);
+		else
+		    free(text);
+	    }
 
 	    /* set flag, copy current selection to old one */
 	    s->selecting = 0;
