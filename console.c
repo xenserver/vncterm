@@ -264,17 +264,17 @@ static int nb_consoles = 0;
 void set_color_table(DisplayState *ds); 
 
 #define clip_y(s, v) {			\
-	if ((s)->v < 0)			\
-	    (s)->v = 0;			\
 	if ((s)->v >= (s)->height)	\
 	    (s)->v = (s)->height - 1;	\
+	if ((s)->v < 0)			\
+	    (s)->v = 0;			\
     }
 
 #define clip_x(s, v) {			\
-	if ((s)->v < 0)			\
-	    (s)->v = 0;			\
 	if ((s)->v >= (s)->width)	\
 	    (s)->v = (s)->width - 1;	\
+	if ((s)->v < 0)			\
+	    (s)->v = 0;			\
     }
 
 #define clip_xy(s,x,y) {clip_x(s,x);clip_y(s,y);}
@@ -1891,9 +1891,11 @@ static void console_putchar(TextConsole *s, int ch)
 		x = s->esc_params[1];
 		if (x == 0)
 		    x = 1;
+		--x;
 		y = s->esc_params[0];
 		if (y == 0)
 		    y = 1;
+		--y;
 		set_cursor(s, x,  (s->origin_mode ? s->sr_top : 0) + y);
 		dprintf("cursor pos %d:%d\n", s->y, s->x);
 		break;
@@ -2736,7 +2738,6 @@ CharDriverState *text_console_init(DisplayState *ds)
 
     s->y_base = DEFAULT_BACKSCROLL/3;
     s->total_height = DEFAULT_BACKSCROLL;
-    set_cursor(s, 0, 0);
 
     zero_selection(s, 1);
 
@@ -2770,6 +2771,7 @@ CharDriverState *text_console_init(DisplayState *ds)
     s->t_attrib = s->t_attrib_default;
 
     text_console_resize(s);
+    set_cursor(s, 0, 0);
 
     return chr;
 }
