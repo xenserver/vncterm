@@ -242,18 +242,6 @@ struct process {
 };
 
 void
-stdin_to_process(void *opaque)
-{
-    struct process *p = opaque;
-    uint8_t buf[16];
-    int count;
-
-    count = read(0, buf, 16);
-    if (count > 0)
-	write(p->fd, buf, count);
-}
-
-void
 process_read(void *opaque)
 {
     struct process *p = opaque;

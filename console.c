@@ -261,7 +261,7 @@ typedef struct TextConsole TextConsole;
 static TextConsole *active_console;
 static TextConsole *consoles[MAX_CONSOLES];
 static int nb_consoles = 0;
-void set_color_table(DisplayState *ds); 
+static void set_color_table(DisplayState *ds);
 
 #define clip_y(s, v) {			\
 	if ((s)->v >= (s)->height)	\
@@ -903,21 +903,6 @@ highlight(TextConsole *s, int from_x, int from_y, int to_x, int to_y, int highli
     }
 }
 
-/*
-static void
-refresh(TextConsole *s, int y, int x)
-{
-    TextCell *c;
-
-    if (x < 0 || y < 0 || x >= s->width || y >= s->height)
-	return;
-
-    c = &s->cells[cy(y) * s->width + x];
-    vga_putcharxy(s, x, y, c->ch, &(c->t_attrib), &(c->c_attrib));
-    s->ds->dpy_update(s->ds, x * FONT_WIDTH, y * FONT_HEIGHT,
-		      FONT_WIDTH, FONT_HEIGHT);
-}
-*/
 int
 mouse_is_absolute(void *opaque)
 {
@@ -2667,22 +2652,7 @@ static TextConsole *new_console(DisplayState *ds, int text)
     return s;
 }
 
-TextConsole *graphic_console_init(DisplayState *ds)
-{
-    TextConsole *s;
-
-    s = new_console(ds, 0);
-    if (!s)
-      return NULL;
-    return s;
-}
-
-int is_graphic_console(void)
-{
-    return !active_console->text_console;
-}
-
-void set_color_table(DisplayState *ds) 
+static void set_color_table(DisplayState *ds)
 {
     int i, j;
     for(j = 0; j < 2; j++) {
