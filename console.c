@@ -113,19 +113,21 @@ struct chunked_stream {
     struct stream_chunk **chunk_tail;
 };
 
-void
+static void
 write_or_chunk(struct chunked_stream *s, uint8_t *buf, int len)
 {
     int done;
     struct stream_chunk *chunk;
 
     while (s->chunk) {
-	done = write(s->fd, s->chunk->data + s->chunk->offset,
-		     s->chunk->len - s->chunk->offset);
+	chunk = s->chunk;
+	done = write(s->fd, chunk->data + chunk->offset,
+		     chunk->len - chunk->offset);
         if (done < 0) return; /* XXX error */
-	s->chunk->offset += done;
-	if (s->chunk->offset == s->chunk->len) {
-	    s->chunk = s->chunk->next;
+	chunk->offset += done;
+	if (chunk->offset == chunk->len) {
+	    s->chunk = chunk->next;
+	    free(chunk);
 	    if (s->chunk == NULL)
 		s->chunk_tail = &s->chunk;
 	} else
