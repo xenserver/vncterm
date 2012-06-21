@@ -796,6 +796,7 @@ static void vnc_set_server_text(DisplayState *ds, char *text)
     VncState *vs = ds->opaque;
     int i;
 
+    if (!text) return;
     if (vs->server_cut_text)
 	free(vs->server_cut_text);
     vs->server_cut_text = text;
