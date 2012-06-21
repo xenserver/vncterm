@@ -515,30 +515,23 @@ static void xenstore_write_statefile(const char *filepath)
 
 static void privsep_xenstore_statefile()
 {
-    size_t l;
-    char *filepath = NULL;
+    uint32_t l;
+    char filepath[256+1];
 
     must_read(parent_fd, &l, sizeof(l));
     if (l == 0 || l > 256) {
         errno = EINVAL;
-        goto done;
+        return;
     }
-    filepath = malloc(l+1);
-    if (!filepath)
-        goto done;
     must_read(parent_fd, filepath, l);
-    filepath[l] = 0;
 
     xenstore_write_statefile(filepath);
-
-done:
-    free(filepath);
 }
 
 static void privsep_statefile_completed(const char *name)
 {
     enum privsep_opcode cmd;
-    int l;
+    uint32_t l;
 
     if (privsep_fd <= 0) {
         xenstore_write_statefile(name);
