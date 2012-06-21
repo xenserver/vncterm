@@ -163,10 +163,10 @@ static struct timer **timers_tail = &timers;
 uint64_t
 get_clock(void)
 {
-    struct timeval tv;
-    if (gettimeofday(&tv, NULL) != 0)
-	err(1, "gettimeofday");
-    return (uint64_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+	    err(1, "clock_gettime");
+    return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
 void *
