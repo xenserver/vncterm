@@ -714,7 +714,7 @@ static inline int find_update_height(VncState *vs, uint64_t *row,
 {
     int h = 1;
 
-    while (y + h <= maxy && row[y + h] & mask) {
+    while (y + h < maxy && row[y + h] & mask) {
 	row[y + h] &= ~mask;
 	h++;
     }
