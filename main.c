@@ -1109,9 +1109,9 @@ main(int argc, char **argv, char **envp)
         /* prevent DoS */
         alarm(20);
 
-	if (ret == 0) {
-	    now = get_clock();
-	    while (timers && timers->timeout < now) {
+        /* Test for timers. Test even if not timeout to avoid situations where we have always data */
+	now = get_clock();
+	while (timers && timers->timeout < now) {
 		t = timers;
 		timers = t->next;
 		if (timers == NULL)
@@ -1121,8 +1121,8 @@ main(int argc, char **argv, char **envp)
 		*timers_tail = t;
 		timers_tail = &t->next;
 		t->callback(t->opaque);
-	    }
 	}
+
 	if (ret > 0) {
 	    ioh = iohandlers;
 	    for (ioh = iohandlers; ioh != NULL; ioh = next) {
