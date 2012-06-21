@@ -248,7 +248,7 @@ process_read(void *opaque)
     uint8_t buf[16];
     int count;
 
-    count = read(p->fd, buf, 16);
+    count = read(p->fd, buf, sizeof(buf));
     if (count > 0)
     {
         p->console->chr_write(p->console, buf, count);
@@ -339,7 +339,7 @@ pty_read(void *opaque)
     uint8_t buf[16];
     int count;
 
-    count = read(pty->fd, buf, 16);
+    count = read(pty->fd, buf, sizeof(buf));
     if (count > 0)
     {
     	pty->console->chr_write(pty->console, buf, count);
