@@ -305,6 +305,7 @@ void
 end_process(struct process *p)
 {
     close(p->fd);
+    free(p);
 }
 
 static void
