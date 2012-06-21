@@ -164,7 +164,6 @@ struct VncState
     /* input */
     uint8_t modifiers_state[256];
 
-    int update_requested;
     int send_resize;
 
     char *server_cut_text;
@@ -755,7 +754,6 @@ static void _vnc_update_client(void *opaque)
 
     vnc_write_pending_all(vs);
 
-    vs->update_requested = 0;
     vs->has_update = 0;
     vs->last_update_time = now;
 
@@ -789,7 +787,6 @@ static void _vnc_update_client(void *opaque)
 	    return;
 	}
     }
-    vs->update_requested = 1;
     vs->ds->set_timer(vs->timer, now + vs->timer_interval);
     return;
 }
@@ -820,7 +817,6 @@ static void vnc_update_client(void *opaque)
 static void vnc_timer_init(VncState *vs)
 {
     if (vs->timer == NULL) {
-        vs->update_requested = 1;
 	vs->timer = vs->ds->init_timer(vnc_update_client, vs);
 	vs->timer_interval = VNC_REFRESH_INTERVAL_BASE;
     }
@@ -1388,7 +1384,6 @@ static void framebuffer_update_request(struct VncClientState *vcs,
     vs->visible_y = 0;
     vs->visible_w = vs->ds->width;
     vs->visible_h = vs->ds->height;
-    vs->update_requested = 1;
 
     vs->ds->set_timer(vs->timer, vs->ds->get_clock());
 }
@@ -1590,7 +1585,6 @@ static int protocol_client_msg(struct VncClientState *vcs, uint8_t *data,
 	if (len == 1)
 	    return 8;
 
-        vs->update_requested = 1;
 	vs->timer_interval = VNC_REFRESH_INTERVAL_BASE;
 	vs->ds->set_timer(vs->timer, vs->ds->get_clock() + vs->timer_interval);
 	key_event(vs, read_u8(data, 1), read_u32(data, 4));
@@ -1599,7 +1593,6 @@ static int protocol_client_msg(struct VncClientState *vcs, uint8_t *data,
 	if (len == 1)
 	    return 6;
 
-        vs->update_requested = 1;
 	vs->timer_interval = VNC_REFRESH_INTERVAL_BASE;
 	vs->ds->set_timer(vs->timer, vs->ds->get_clock() + vs->timer_interval);
 	pointer_event(vcs, read_u8(data, 1), read_u16(data, 2),
@@ -1622,7 +1615,6 @@ static int protocol_client_msg(struct VncClientState *vcs, uint8_t *data,
 	if (len == 1)
 	    return 8;
 
-	vs->update_requested = 1;
 	vs->timer_interval = VNC_REFRESH_INTERVAL_BASE;
 	vs->ds->set_timer(vs->timer, vs->ds->get_clock() + vs->timer_interval);
 	scan_event(vs, read_u8(data, 1), read_u32(data, 4));
