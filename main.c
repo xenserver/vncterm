@@ -525,6 +525,7 @@ static void privsep_xenstore_statefile()
         return;
     }
     must_read(parent_fd, filepath, l);
+    filepath[l] = 0;
 
     xenstore_write_statefile(filepath);
 }
