@@ -605,6 +605,12 @@ static void parent_handle_sigchld(int num)
         signal(SIGCHLD, parent_handle_sigchld);
 }
 
+static void parent_handle_sigterm(int num)
+{
+    kill(child_pid, SIGTERM);
+    signal(SIGTERM, parent_handle_sigterm);
+}
+
 int
 main(int argc, char **argv, char **envp)
 {
@@ -938,6 +944,7 @@ main(int argc, char **argv, char **envp)
             parent_fd = socks[1];
             signal(SIGUSR1, parent_handle_sigusr1);
             signal(SIGCHLD, parent_handle_sigchld);
+            signal(SIGTERM, parent_handle_sigterm);
 
             while (1) {
                 must_read(parent_fd, &opcode, sizeof(opcode));
