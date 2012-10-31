@@ -299,10 +299,7 @@ static void vnc_dpy_update(DisplayState *ds, int x, int y, int w, int h)
 	if (VCS_ACTIVE(vs->vcs[i]))
 	    set_bits_in_row(vs, vs->vcs[i]->update_row, x, y, w, h);
 
-    if (!vs->has_update && vs->timer) {
-        vs->ds->set_timer(vs->timer, vs->ds->get_clock() + vs->timer_interval);
-        vs->has_update = 1;
-    }
+    vs->has_update = 1;
 }
 
 static unsigned char vnc_dpy_clients_connected(DisplayState *ds)
@@ -1380,10 +1377,7 @@ static void framebuffer_set_updated(VncState *vs, int x, int y, int w, int h)
 	if (VCS_ACTIVE(vs->vcs[i]))
 	    set_bits_in_row(vs, vs->vcs[i]->update_row, x, y, w, h);
 
-    if (!vs->has_update && vs->timer) {
-        vs->ds->set_timer(vs->timer, vs->ds->get_clock() + vs->timer_interval);
-        vs->has_update = 1;
-    }
+    vs->has_update = 1;
 }
 
 static void framebuffer_update_request(struct VncClientState *vcs,
