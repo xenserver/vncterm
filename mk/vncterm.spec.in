@@ -7,7 +7,7 @@ Group: System/Hypervisor
 Source0: %{name}-%{version}.tar.bz2
 Patch0: %{name}-development.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: xen-devel
+BuildRequires: xen-devel xen-dom0-devel
 
 %description
 This package contains the vncterm utility
