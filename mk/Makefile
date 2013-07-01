@@ -3,17 +3,18 @@ IMPORT_BRANDING := yes
 include $(B_BASE)/common.mk
 include $(B_BASE)/rpmbuild.mk
 
-REPO_NAME= vncterm
+REPO_NAME := vncterm
+REPO_LOC  := $(call git_loc,vncterm)
 RPM_BUILD_COOKIE= $(MY_OBJ_DIR)/.rpm_build_cookie
 
 J_FLAG = 8
-MAKE_CMD= $(MAKE) -j$(J_FLAG) -C $(call hg_loc,vncterm)
+MAKE_CMD= $(MAKE) -j$(J_FLAG) -C $(REPO_LOC)
 
 -include $(MY_OBJ_DIR)/version.inc
 $(MY_OBJ_DIR)/version.inc:
 	rm -f $(MY_OBJ_DIR)/version.inc
 	$(version-makefile) > $@
-	$(call hg_cset_number,vncterm) >> $@
+	$(call git_cset_number,vncterm) >> $@
 	echo VNCTERM_VERSION := \$$\(PLATFORM_VERSION\) >> $@
 	echo VNCTERM_RELEASE := \$$\(CSET_NUMBER\) >> $@
 
@@ -39,11 +40,13 @@ SOURCES = $(RPM_SOURCESDIR)/vncterm-$(VNCTERM_VERSION).tar.bz2 \
 	  $(RPM_SOURCESDIR)/vncterm-development.patch \
 	  $(RPM_SPECSDIR)/vncterm.spec
 
-$(RPM_SOURCESDIR)/vncterm-$(VNCTERM_VERSION).tar.bz2: $(RPM_SOURCESDIR)/.dirstamp $(call hg_loc,vncterm)
-	hg -R $(call hg_loc,vncterm) archive -t tbz2 $@
+$(RPM_SOURCESDIR)/vncterm-$(VNCTERM_VERSION).tar.bz2: $(RPM_SOURCESDIR)/.dirstamp $(REPO_LOC)
+	set -e; set -o pipefail; \
+	(cd $(REPO_LOC) && exec git archive --prefix=$(patsubst %.tar.bz2,%,$(notdir $@))/ HEAD) | bzip2 -c > $@.tmp
+	mv -f $@.tmp $@
 
-$(RPM_SOURCESDIR)/vncterm-development.patch: $(RPM_SOURCESDIR)/.dirstamp $(call hg_loc,vncterm)
-	hg -R $(call hg_loc,vncterm) diff > $@
+$(RPM_SOURCESDIR)/vncterm-development.patch: $(RPM_SOURCESDIR)/.dirstamp $(REPO_LOC)
+	(cd $(REPO_LOC) && exec git diff) > $@
 
 $(RPM_SPECSDIR)/vncterm.spec: vncterm.spec.in $(RPM_SPECSDIR)/.dirstamp
 # Use a temporary file because sed in rhel3 doesn't understand "\n"
