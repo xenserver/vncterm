@@ -1,0 +1,18 @@
+What is this repository ?
+==========================
+
+This is the repository of XenServer-specific commits to the Xen project
+vncterm.
+
+Some code is devived from the QEMU project and license headers reflect 
+this as appropriate.
+
+To contribute bug fixes, email them to the XenServer development mailing
+
+list (xs-devel@lists.xenserver.org).
+
+
+What other documentation is available ?
+========================================
+
+To install vncterm for XenServer please read INSTALL.

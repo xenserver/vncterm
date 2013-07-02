@@ -1,0 +1,45 @@
+There are prerequisites for building a vncterm source
+release for XenServer. All the following must be installed, either by
+visiting the project webpage or installing a pre-built package
+provided by your OS distributor.  These install notes assume a 
+CentOS 5.7 or similar distribution:
+   * GCC v3.4 or later
+   * GNU Make
+   * GNU Binutils
+   * RPM build
+   * Redhat rpm config (if debuginfo is required)
+   * Development install of Python v2.3 or later (e.g., python-devel)
+   * Development install of bzip2 (e.g.,bzip2-devel)
+   * Development install of e4fsprogs (e.g., e4fsprogs-devel)
+   * Development install of xen (e.g. xen-devel & xen-dom0-devel)
+   * Development install of yajl (e.g. libyajl-dev)
+
+Binary rpms of yajl can be downloaded from xenserver.com
+
+
+Follow these steps to build an RPM.
+
+1. Clone the vncterm git repository to /some/path/vncterm
+
+2. To obtain a vncterm tarball file run the following cmd:
+    git archive --prefix=vncterm-1.8.50/ HEAD | bzip2 -c > vncterm-1.8.50.tar.bz2
+
+3. Create diff patch:
+    git diff > vncterm-development.patch
+
+4. Replace with correct version numbers to create the spec file:
+    sed -e s\,@VNCTERM_VERSION@,1.8.50,g\
+        -e s\,@VNCTERM_RELEASE@,252,g\
+         < ./mk/vncterm.spec.in  \
+         > vncterm.spec
+
+5. Move vncterm-1.8.50.tar.bz2 to /usr/src/redhat/SOURCES/
+   Move vncterm-development.patch to /usr/src/redhat/SOURCES/
+   Move vncterm.spec to /usr/src/redhat/SPECS/
+
+6. To build the RPMs run:
+    cd /usr/src/redhat/SPECS/
+    rpmbuild -ba vncterm.spec --target i686
+
+7. Install using
+    rpm -ivh /usr/src/redhat/RPMS/i686/vncterm*.rpm
