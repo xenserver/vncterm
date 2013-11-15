@@ -62,7 +62,7 @@ $(RPM_SPECSDIR)/vncterm.spec: vncterm.spec.in $(RPM_SPECSDIR)/.dirstamp
 	-rm changelog.tmp
 
 $(RPM_BUILD_COOKIE): $(RPM_DIRECTORIES) $(SOURCES)
-	$(RPMBUILD) --target i686 -ba $(RPM_SPECSDIR)/vncterm.spec
+	$(RPMBUILD) --target $(DOMAIN0_ARCH_OPTIMIZED) -ba $(RPM_SPECSDIR)/vncterm.spec
 	@touch $@
 
 $(MY_SOURCES)/MANIFEST: $(MY_SOURCES)/.dirstamp
