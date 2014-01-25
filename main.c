@@ -47,7 +47,7 @@
 #include <locale.h>
 
 #ifndef NXENSTORE
-#include <xs.h>
+#include <xenstore.h>
 #endif
 
 #if !defined(__APPLE__)
