@@ -955,9 +955,9 @@ main(int argc, char **argv, char **envp)
             rlim.rlim_max = 64 * 1024 * 1024 + 64;
             setrlimit(RLIMIT_FSIZE, &rlim);
 
-            /* limit memory ro 32MB */
-            rlim.rlim_cur = 32 * 1024 * 1024;
-            rlim.rlim_max = 32 * 1024 * 1024;
+            /* limit memory ro 128MB */
+            rlim.rlim_cur = 128 * 1024 * 1024;
+            rlim.rlim_max = 128 * 1024 * 1024;
             setrlimit(RLIMIT_AS, &rlim);
 
             rlim.rlim_cur = 256;
