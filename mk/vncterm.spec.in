@@ -21,8 +21,9 @@ This package contains the vncterm utility
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p ${RPM_BUILD_ROOT}%{_libdir}/xen/bin
+mkdir -p ${RPM_BUILD_ROOT}/opt/xensource/libexec
 cp vncterm ${RPM_BUILD_ROOT}%{_libdir}/xen/bin/vncterm
-cp dom0term/dom0term.sh ${RPM_BUILD_ROOT}%{_libdir}/xen/bin/dom0term.sh
+cp dom0term/dom0term.sh ${RPM_BUILD_ROOT}/opt/xensource/libexec
 mkdir -p ${RPM_BUILD_ROOT}%{_datadir}/xen/qemu
 
 %clean
@@ -32,6 +33,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc
 %{_libdir}/xen/bin/vncterm
-%{_libdir}/xen/bin/dom0term.sh
+/opt/xensource/libexec/dom0term.sh
 
 %changelog
