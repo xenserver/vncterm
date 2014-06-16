@@ -102,7 +102,7 @@ enum privsep_opcode {
     privsep_op_statefile_completed
 };
 
-static void _write_port_to_xenstore(char *xenstore_path, char *type, int port);
+static void _write_port_to_xenstore(struct xs_handle *xs, char *xenstore_path, char *type, int port);
 
 int
 set_fd_handler(int fd, int (*fd_read_poll)(void *), void (*fd_read)(void *),
@@ -398,8 +398,6 @@ read_xs_watch(struct xs_handle *xs, struct vncterm *vncterm)
 
     vncterm->pty = connect_pty(pty_path, vncterm->console, vncterm->tds);
 
-    xs_unwatch(xs, vncterm->xenstore_path, "tty");
-
  out:
     free(pty_path);
     free(vec);
@@ -438,7 +436,6 @@ static int child_pid;
 static gid_t vncterm_gid;
 static uid_t vncterm_uid;
 #ifndef NXENSTORE
-struct xs_handle *xs = NULL;
 char *xenstore_path = NULL;
 #endif
 
@@ -504,12 +501,18 @@ static void xenstore_write_statefile(const char *filepath)
     int ret;
     char *path = NULL;
 
+    struct xs_handle *xs = xs_daemon_open();
+    if (xs == NULL)
+        err(1, "xs_daemon_open");
+
     ret = asprintf(&path, "%s/statefile", xenstore_path);
     if (ret < 0)
         err(1, "asprintf");
     ret = xs_write(xs, XBT_NULL, path, filepath, strlen(filepath));
     if (!ret)
         err(1, "xs_write");
+
+    xs_daemon_close(xs);
 
     free(path);
 }
@@ -842,13 +845,13 @@ main(int argc, char **argv, char **envp)
 	xenstore_path = NULL;
 
     if (xenstore_path) {
-	xs = xs_daemon_open();
+	struct xs_handle *xs = xs_daemon_open();
 	if (xs == NULL)
 	    err(1, "xs_daemon_open");
 
-        _write_port_to_xenstore(xenstore_path, "vnc", display);
+        _write_port_to_xenstore(xs, xenstore_path, "vnc", display);
         if (enable_textterm)
-            _write_port_to_xenstore(xenstore_path, "tc", text_display);
+            _write_port_to_xenstore(xs, xenstore_path, "tc", text_display);
 
 	if (!cmd_mode) {
 	    ret = asprintf(&vncterm->xenstore_path, "%s/tty", xenstore_path);
@@ -861,7 +864,10 @@ main(int argc, char **argv, char **envp)
 
             while (vncterm->pty == NULL)
                 read_xs_watch(xs, vncterm);
+
+            xs_unwatch(xs, vncterm->xenstore_path, "tty");
 	}
+        xs_daemon_close(xs);
     }
     else /* fallthrough */
 #endif
@@ -946,7 +952,6 @@ main(int argc, char **argv, char **envp)
 
             close(socks[1]);
             privsep_fd = socks[0];
-            xs_daemon_close(xs);
 
             if (!cmd_mode)
                 unshare(CLONE_NEWNET);
@@ -1172,7 +1177,7 @@ main(int argc, char **argv, char **envp)
     return 0;
 }
 
-static void _write_port_to_xenstore(char *xenstore_path, char *type, int no)
+static void _write_port_to_xenstore(struct xs_handle *xs, char *xenstore_path, char *type, int no)
 {
     char *path, *port;
     int ret;
