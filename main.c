@@ -569,7 +569,7 @@ static void parent_handle_sigusr1(int num)
         int f;
         char name[sizeof(root_directory)+20];
         snprintf(name, sizeof(name), "%s/vncterm.statefile", root_directory);
-        f = creat(name, 0644);
+        f = creat(name, 0640);
         if (f > 0) {
             fchown(f, vncterm_uid, vncterm_gid);
             close(f);
@@ -978,7 +978,7 @@ main(int argc, char **argv, char **envp)
             chroot(root_directory);
 
             snprintf(name, 64, "core.%d", getpid());
-            f = creat(name, 0644);
+            f = creat(name, 0640);
             if (f > 0) {
                 fchown(f, vncterm_uid, vncterm_gid);
                 close(f);
