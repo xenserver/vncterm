@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-static uint8_t graphfont16[256 * 16] = {
+static const uint8_t graphfont16[256 * 16] = {
 
 	/* 0 0x00 '^@' */
 	0x00, /* 00000000 */

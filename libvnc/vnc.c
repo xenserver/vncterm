@@ -511,7 +511,7 @@ static void vnc_write_pixels_generic(struct VncClientState *vcs,
     }
 }
 
-unsigned char cursorbmsk[16] = {
+static const unsigned char cursorbmsk[16] = {
 	0xff, /* 11111111 */
 	0x3c, /* 00111100 */
 	0x18, /* 00011000 */

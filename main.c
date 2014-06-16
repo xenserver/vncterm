@@ -647,7 +647,7 @@ main(int argc, char **argv, char **envp)
 
     while (1) {
 	int c;
-	static struct option long_options[] = {
+	static const struct option long_options[] = {
 	    {"cmd", 0, 0, 'c'},
 	    {"pty", 1, 0, 'p'},
 	    {"restart", 0, 0, 'r'},
