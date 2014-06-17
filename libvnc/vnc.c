@@ -88,7 +88,6 @@ struct vnc_pm_server_cut_text {
 struct vnc_pending_messages {
     uint8_t vpm_resize;
     uint8_t vpm_bell;
-    uint8_t vpm_null_update;
     uint8_t vpm_server_cut_text;
     uint8_t vpm_cursor_update;
     struct vnc_pm_region_update *vpm_region_updates;
