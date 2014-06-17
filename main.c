@@ -610,7 +610,6 @@ main(int argc, char **argv, char **envp)
     int text_display;
     struct iohandler *ioh, *next;
     struct timer *t;
-    char **newenvp = NULL;	/* sigh gcc */
     int nenv;
     uint64_t now;
     short revents;
@@ -881,20 +880,11 @@ main(int argc, char **argv, char **envp)
 	cmd_mode = 1;
 
     if (cmd_mode) {
-	/* count env variables */
-	for (nenv = 0; envp[nenv]; nenv++);
-
-	newenvp = malloc(++nenv * sizeof(char *));
-	if (newenvp == NULL)
-		err(1, "malloc");
-
+        /* replace terminal type with "linux" */
 	for (nenv = 0; envp[nenv]; nenv++) {
 		if (!strncmp(envp[nenv], "TERM=", 5)) 
-			newenvp[nenv] = "TERM=linux";
-		else
-			newenvp[nenv] = envp[nenv];
+			envp[nenv] = "TERM=linux";
 	}
-	newenvp[nenv] = NULL;
 
 	if (argc == optind) {
 	    argv = calloc(2, sizeof(char *));
@@ -1005,7 +995,7 @@ main(int argc, char **argv, char **envp)
 	    if (vncterm->process)
 		end_process(vncterm->process);
 	    vncterm->process = run_process(vncterm->console, vncterm->tds, orig_umask,
-                                           argv[0], argv, newenvp);
+                                           argv[0], argv, envp);
 	    restart_needed = 0;
 	}
 
