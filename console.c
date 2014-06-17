@@ -517,6 +517,7 @@ static inline unsigned int col_expand(DisplayState *ds, unsigned int col)
     return col;
 }
 
+#ifdef DEBUG_CONSOLE
 static void console_print_text_attributes(TextAttributes *t_attrib, char ch)
 {
     if (!do_log)
@@ -550,6 +551,11 @@ static void console_print_text_attributes(TextAttributes *t_attrib, char ch)
 
     dprintf(" fg: %d bg: %d ch:'%2X' '%c'\n", t_attrib->fgcol, t_attrib->bgcol, ch, ch);
 }
+#else
+static inline void console_print_text_attributes(TextAttributes *t_attrib, char ch)
+{
+}
+#endif
 
 /* does a framebuffer scrolling by N lines */
 static void vga_scroll(TextConsole *s, int n)
@@ -1380,8 +1386,10 @@ static void console_handle_escape(TextConsole *s)
 }
 #endif
 
+#ifdef DEBUG_CONSOLE
 static char normbuf[1024];
 static int normidx = 0, norm_x = 0, norm_y = 0;
+
 static void print_norm(void)
 {
     if (normidx) {
@@ -1400,6 +1408,14 @@ static void put_norm(TextConsole *s, char ch)
     if (normidx == 1024)
 	print_norm();
 }
+#else
+static inline void put_norm(TextConsole *s, char ch)
+{
+}
+static inline void print_norm(void)
+{
+}
+#endif
 
 static void do_putchar_utf(TextConsole *s, wchar_t ch, char glyph)
 {

@@ -19,7 +19,7 @@
 extern int do_log;
 
 #ifdef DEBUG_CONSOLE
-#define dprintf printf
+#define dprintf printf do { } while(0)
 #else
-#define dprintf(s, ...) {if (do_log) printf(s, ## __VA_ARGS__);}
+#define dprintf(s, ...) do { if (do_log) printf(s, ## __VA_ARGS__); } while(0)
 #endif
