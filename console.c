@@ -464,7 +464,7 @@ static const uint32_t color_table_rgb[2][8] = {
     }
 };
 
-#define UTFVAL(B) (consmap[curf][B]&0xffff)
+#define UTFVAL(B) (consmap[curf].uni[B])
 /* simplest binary search */
 static int get_glyphcode(TextConsole *s, int chart)
 {
@@ -491,7 +491,7 @@ static int get_glyphcode(TextConsole *s, int chart)
 	if (UTFVAL(mid) < chart)
 	    low = mid + 1;
 	else {
-	    o = (consmap[curf][mid]>>16)&0xff;
+	    o = consmap[curf].ch[mid];
 	    break;
         }
     }
@@ -2260,32 +2260,6 @@ static void kbd_send_chars(void *opaque)
 }
 #endif
 
-static int cmputfents(const void *p1, const void *p2)
-{
-    int a,b;
-
-    a=*(int*)p1;
-    b=*(int*)p2;
-
-    return (a&0xffff)-(b&0xffff);
-}
-
-static void prepare_console_maps()
-{
-    unsigned int i,j;
-
-    for(i=0;i<3;i++)
-	for(j=0;j<256;j++) {
- 	    consmap[i][j] |= j<<16;
-	}
-    /*
-	now we have to sort it, in order to prepare for binary search
-    */
-
-    for(i=0;i<3;i++)
-	qsort( consmap[i], 256, sizeof(unsigned int), cmputfents );
-}
-
 /* Not safe after we drop privileges */
 void dump_console_to_file(CharDriverState *chr, char *fn)
 {
@@ -2684,7 +2658,6 @@ CharDriverState *text_console_init(DisplayState *ds)
 
 /* init unicode maps */
 //    parse_unicode_map("/usr/share/xen/qemu/cp437_to_uni.trans");
-    prepare_console_maps();
 
     chr = qemu_mallocz(sizeof(CharDriverState));
     if (!chr)
