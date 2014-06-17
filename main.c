@@ -75,8 +75,8 @@
 char vncpasswd[64];
 unsigned char challenge[AUTHCHALLENGESIZE];
 
-DisplayState display_state;
-TextDisplayState text_display_state;
+static DisplayState display_state;
+static TextDisplayState text_display_state;
 int do_log;
 
 static int dump_cells = 0;
@@ -104,7 +104,7 @@ enum privsep_opcode {
 
 static void _write_port_to_xenstore(struct xs_handle *xs, char *xenstore_path, char *type, int port);
 
-int
+static int
 set_fd_handler(int fd, int (*fd_read_poll)(void *), void (*fd_read)(void *),
 	       void (*fd_write)(void *), void *opaque)
 {
@@ -134,7 +134,7 @@ set_fd_handler(int fd, int (*fd_read_poll)(void *), void (*fd_read)(void *),
     return 0;
 }
 
-int
+static int
 set_fd_error_handler(int fd, void (*fd_error)(void *))
 {
     struct iohandler **pioh = &iohandlers;
@@ -160,7 +160,7 @@ struct timer {
 static struct timer *timers = NULL;
 static struct timer **timers_tail = &timers;
 
-uint64_t
+static uint64_t
 get_clock(void)
 {
     struct timespec ts;
@@ -169,7 +169,7 @@ get_clock(void)
     return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
-void *
+static void *
 init_timer(void (*callback)(void *), void *opaque)
 {
     struct timer *t;
@@ -186,7 +186,7 @@ init_timer(void (*callback)(void *), void *opaque)
     return t;
 }
 
-int
+static int
 set_timer(void *_t, uint64_t timeout)
 {
     struct timer *t = _t;
@@ -214,11 +214,12 @@ set_timer(void *_t, uint64_t timeout)
     return 0;
 }
 
-void kbd_put_keycode(int keycode)
+static void
+kbd_put_keycode(int keycode)
 {
 }
 
-void
+static void
 hw_update(void *s)
 {
     // CharDriverState *console = s;
@@ -226,7 +227,7 @@ hw_update(void *s)
     // console_select(0);
 }
 
-void
+static void
 hw_invalidate(void *s)
 {
     // CharDriverState *console = s;
@@ -241,7 +242,7 @@ struct process {
     pid_t pid;
 };
 
-void
+static void
 process_read(void *opaque)
 {
     struct process *p = opaque;
@@ -269,7 +270,7 @@ static void _configure_input_fd(CharDriverState *console,
 }
 
 /* Not safe after we've dropped privileges */
-struct process *
+static struct process *
 run_process(CharDriverState *console, TextDisplayState *tds, mode_t mask,
             const char *filename, char *const argv[], char *const envp[])
 {
@@ -302,7 +303,7 @@ run_process(CharDriverState *console, TextDisplayState *tds, mode_t mask,
     return p;
 }
 
-void
+static void
 end_process(struct process *p)
 {
     close(p->fd);
@@ -334,7 +335,7 @@ struct pty {
     TextDisplayState *tds;
 };
 
-void
+static void
 pty_read(void *opaque)
 {
     struct pty *pty = opaque;
@@ -405,7 +406,7 @@ read_xs_watch(struct xs_handle *xs, struct vncterm *vncterm)
 }
 #endif
 
-int
+static int
 vnc_start_viewer(char** opts)
 {
     int pid, i, open_max;
@@ -437,7 +438,7 @@ static int child_pid;
 static gid_t vncterm_gid;
 static uid_t vncterm_uid;
 #ifndef NXENSTORE
-char *xenstore_path = NULL;
+static char *xenstore_path = NULL;
 #endif
 
 static void clean_exit(int ret)

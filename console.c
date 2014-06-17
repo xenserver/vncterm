@@ -47,7 +47,7 @@
 #define G0	0
 #define G1	1
 
-int insertmode = 0;
+static int insertmode = 0;
 
 typedef struct TextAttributes {
     uint8_t fgcol:4;
@@ -1380,8 +1380,8 @@ static void console_handle_escape(TextConsole *s)
 }
 #endif
 
-char normbuf[1024];
-int normidx = 0, norm_x = 0, norm_y = 0;
+static char normbuf[1024];
+static int normidx = 0, norm_x = 0, norm_y = 0;
 static void print_norm(void)
 {
     if (normidx) {
