@@ -694,12 +694,12 @@ main(int argc, char **argv, char **envp)
 	    break;
 	case 'V':
 	    vncviewer = 1;
-        if (optarg != NULL)
-            vncvieweroptions = strdup(optarg);
+            if (optarg != NULL)
+                vncvieweroptions = strdup(optarg);
+            break;
         case 'T':
             enable_textterm = 1;
             break;
-        break;
 	}
     }
 
