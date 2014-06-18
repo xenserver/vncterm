@@ -444,9 +444,12 @@ static char *xenstore_path = NULL;
 static void clean_exit(int ret)
 {
     if (strcmp(root_directory, "/var/empty")) {
-        char name[80];
+        char name[sizeof(root_directory)+20];
         struct stat buf;
-        snprintf(name, 80, "%s/core.%d", root_directory, child_pid);
+        snprintf(name, sizeof(name), "%s/core.%d", root_directory, child_pid);
+        if (!stat(name, &buf) && !buf.st_size)
+            unlink(name);
+        snprintf(name, sizeof(name), "%s/vncterm.statefile", root_directory);
         if (!stat(name, &buf) && !buf.st_size)
             unlink(name);
         rmdir(root_directory);
