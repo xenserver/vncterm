@@ -75,8 +75,6 @@
 char vncpasswd[64];
 unsigned char challenge[AUTHCHALLENGESIZE];
 
-static DisplayState display_state;
-static TextDisplayState text_display_state;
 int do_log;
 
 static int dump_cells = 0;
@@ -598,8 +596,8 @@ static void parent_handle_sigterm(int num)
 int
 main(int argc, char **argv, char **envp)
 {
-    DisplayState *ds;
-    TextDisplayState *tds;
+    DisplayState ds[1];
+    TextDisplayState tds[1];
     struct vncterm vncterm[1];
     struct sockaddr_in sa, sat;
     int display;
@@ -706,8 +704,7 @@ main(int argc, char **argv, char **envp)
     memset(vncterm, 0, sizeof(vncterm));
 
     setlocale(LC_ALL, "en_US.UTF-8");
-    ds = &display_state;
-    memset(ds, 0, sizeof(display_state));
+    memset(ds, 0, sizeof(*ds));
     ds->set_fd_handler = set_fd_handler;
     ds->set_fd_error_handler = set_fd_error_handler;
     ds->init_timer = init_timer;
@@ -716,8 +713,7 @@ main(int argc, char **argv, char **envp)
     ds->kbd_put_keycode = kbd_put_keycode;
     ds->kbd_put_keysym = kbd_put_keysym;
 
-    tds = &text_display_state;
-    memset(tds, 0, sizeof(text_display_state));
+    memset(tds, 0, sizeof(*tds));
     if (enable_textterm) {
         tds->set_fd_handler = set_fd_handler;
         tds->set_fd_error_handler = set_fd_error_handler;
