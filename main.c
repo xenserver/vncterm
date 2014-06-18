@@ -823,13 +823,6 @@ main(int argc, char **argv, char **envp)
         vnc_start_viewer(opts);
         free(opts);
     }
-#if 0
-    {
-	char *msg = "Hello World\n\r";
-	vncterm->console->chr_write(vncterm->console, (uint8_t *)msg,
-				    strlen(msg));
-    }
-#endif
 
     ds->mouse_opaque = vncterm->console;
     ds->mouse_is_absolute = mouse_is_absolute;
