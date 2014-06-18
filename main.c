@@ -607,7 +607,7 @@ main(int argc, char **argv, char **envp)
 {
     DisplayState *ds;
     TextDisplayState *tds;
-    struct vncterm *vncterm;
+    struct vncterm vncterm[1];
     struct sockaddr_in sa, sat;
     int display;
     int text_display;
@@ -643,10 +643,6 @@ main(int argc, char **argv, char **envp)
 
     /* umask can't be too strict */
     orig_umask = umask(022);
-
-    vncterm = calloc(1, sizeof(struct vncterm));
-    if (vncterm == NULL)
-	err(1, "malloc");
 
     while (1) {
 	int c;
@@ -713,6 +709,8 @@ main(int argc, char **argv, char **envp)
         break;
 	}
     }
+
+    memset(vncterm, 0, sizeof(vncterm));
 
     setlocale(LC_ALL, "en_US.UTF-8");
     ds = &display_state;
