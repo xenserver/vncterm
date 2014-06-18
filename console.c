@@ -685,8 +685,7 @@ static void text_console_resize(TextConsole *s)
     if (s->width < w1)
         w1 = s->width;
 
-    cells = qemu_malloc(s->width * s->total_height * sizeof(TextCell));
-    memset(cells,0,s->width * s->total_height * sizeof(TextCell));
+    cells = qemu_mallocz(s->width * s->total_height * sizeof(TextCell));
     for(y = 0; y < s->total_height; y++) {
         c = &cells[y * s->width];
         if (w1 > 0) {
@@ -2624,7 +2623,6 @@ static TextConsole *new_console(DisplayState *ds, int text)
     if (!s) {
         return NULL;
     }
-    memset(s, 0, sizeof(TextConsole));
 
     if (!active_console || (active_console->text_console && !text))
         active_console = s;
