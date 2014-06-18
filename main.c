@@ -381,7 +381,7 @@ struct vncterm
 };
 
 #ifndef NXENSTORE
-void
+static char *
 read_xs_watch(struct xs_handle *xs, struct vncterm *vncterm)
 {
     char **vec, *pty_path = NULL;
@@ -389,20 +389,13 @@ read_xs_watch(struct xs_handle *xs, struct vncterm *vncterm)
 
     vec = xs_read_watch(xs, &num);
     if (vec == NULL)
-	return;
+	return NULL;
 
-    if (strcmp(vncterm->xenstore_path, vec[XS_WATCH_PATH]))
-	goto out;
+    if (!strcmp(vncterm->xenstore_path, vec[XS_WATCH_PATH]))
+        pty_path = xs_read(xs, XBT_NULL, vncterm->xenstore_path, NULL);
 
-    pty_path = xs_read(xs, XBT_NULL, vncterm->xenstore_path, NULL);
-    if (pty_path == NULL)
-	goto out;
-
-    vncterm->pty = connect_pty(pty_path, vncterm->console, vncterm->tds);
-
- out:
-    free(pty_path);
     free(vec);
+    return pty_path;
 }
 #endif
 
@@ -868,8 +861,9 @@ main(int argc, char **argv, char **envp)
 	    if (!ret)
 		err(1, "xs_watch");
 
-            while (vncterm->pty == NULL)
-                read_xs_watch(xs, vncterm);
+            do {
+                pty_path = read_xs_watch(xs, vncterm);
+            } while (pty_path == NULL);
 
             xs_unwatch(xs, vncterm->xenstore_path, "tty");
 	}
