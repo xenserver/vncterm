@@ -567,8 +567,8 @@ static void parent_handle_sigusr1(int num)
 {
     if (strcmp(root_directory, "/var/empty")) {
         int f;
-        char name[80];
-        snprintf(name, 80, "%s/vncterm.statefile", root_directory);
+        char name[sizeof(root_directory)+20];
+        snprintf(name, sizeof(name), "%s/vncterm.statefile", root_directory);
         f = creat(name, 0644);
         if (f > 0) {
             close(f);
