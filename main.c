@@ -270,7 +270,7 @@ static void _configure_input_fd(CharDriverState *console,
 
 /* Not safe after we've dropped privileges */
 struct process *
-run_process(CharDriverState *console, TextDisplayState *tds,
+run_process(CharDriverState *console, TextDisplayState *tds, mode_t mask,
             const char *filename, char *const argv[], char *const envp[])
 {
     struct process *p;
@@ -292,6 +292,7 @@ run_process(CharDriverState *console, TextDisplayState *tds,
     if (p->pid < 0)
 	err(1, "fork %s\n", filename);
     if (p->pid == 0) {
+	umask(mask);
 	execve(filename, argv, envp);
 	perror("execve");
 	_exit(1);
@@ -627,6 +628,7 @@ main(int argc, char **argv, char **envp)
     int stay_root = 0;
     int vncviewer = 0;
     int enable_textterm = 0;
+    mode_t orig_umask;
 
 #ifdef USE_POLL
     struct pollfd *pollfds = NULL;
@@ -635,6 +637,9 @@ main(int argc, char **argv, char **envp)
     fd_set rdset, wrset, exset, rdset_m, wrset_m, exset_m;
     struct timeval timeout_tv;
 #endif
+
+    /* umask can't be too strict */
+    orig_umask = umask(022);
 
     vncterm = calloc(1, sizeof(struct vncterm));
     if (vncterm == NULL)
@@ -998,7 +1003,7 @@ main(int argc, char **argv, char **envp)
 	if (restart_needed && cmd_mode) {
 	    if (vncterm->process)
 		end_process(vncterm->process);
-	    vncterm->process = run_process(vncterm->console, vncterm->tds,
+	    vncterm->process = run_process(vncterm->console, vncterm->tds, orig_umask,
                                            argv[0], argv, newenvp);
 	    restart_needed = 0;
 	}
