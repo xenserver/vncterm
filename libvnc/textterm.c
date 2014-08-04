@@ -303,7 +303,8 @@ int text_term_display_init(TextDisplayState *ds, struct sockaddr *addr,
       fcntl(ts->lsock, F_SETFD, ret | FD_CLOEXEC);
 
     do {
-	iaddr->sin_port = htons(port);
+	if (iaddr)
+	    iaddr->sin_port = htons(port);
 	ret = bind(ts->lsock, addr, addrlen);
 	if (ret == -1) {
 	    if (errno == EADDRINUSE && find_unused && addr->sa_family == AF_INET) {
