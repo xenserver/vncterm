@@ -593,6 +593,26 @@ static void parent_handle_sigterm(int num)
     signal(SIGTERM, parent_handle_sigterm);
 }
 
+static void usage(FILE *f)
+{
+    fprintf(f, "Usage: vncterm [OPTION]... [CMD] [ARG]...\n"
+        "Provide VNC server from a terminal.\n"
+        "\n"
+        "  -c, --cmd             enable command mode, execute a command given\n"
+        "  -h, --help            print this help\n"
+        "  -l, --loadstate=FILE  load state from a file\n"
+        "  -p, --pty=PTY         connect to a given pty\n"
+        "  -r, --restart         restart command instead of exiting\n"
+        "  -s, --stay            do not exit when command exit\n"
+        "  -S, --stay-root       do not drop root privileges\n"
+        "  -t, --title=TITLE     set VNC title\n"
+        "  -T, --text            provide telnet access also\n"
+        "  -v, --vnclisten       listen for VNC connection at a given address:port\n"
+        "  -V, --vncviewer[=EXE] launch vncviewer \n"
+        "  -x, --xenstore=PATH   write information at a given xenstore path\n"
+        "");
+}
+
 int
 main(int argc, char **argv, char **envp)
 {
@@ -649,10 +669,11 @@ main(int argc, char **argv, char **envp)
         {"vncviewer", 2, 0, 'V'},
             {"loadstate", 1, 0, 'l'},
             {"text", 0, 0, 'T'},
+            {"help", 0, 0, 'h'},
 	    {0, 0, 0, 0}
 	};
 
-	c = getopt_long(argc, argv, "+cp:rst:x:v:SV::l:T", long_options, NULL);
+	c = getopt_long(argc, argv, "+cp:rst:x:v:SV::l:Th", long_options, NULL);
 	if (c == -1)
 	    break;
 
@@ -698,7 +719,10 @@ main(int argc, char **argv, char **envp)
         case 'T':
             enable_textterm = 1;
             break;
-	}
+        case 'h':
+            usage(stdout);
+            return 0;
+        }
     }
 
     memset(vncterm, 0, sizeof(vncterm));
