@@ -584,7 +584,8 @@ static void vga_putcharxy(TextConsole *s, int x, int y, int ch,
 {
     uint8_t *d;
     const uint8_t *font_ptr;
-    unsigned int font_data, linesize, xorcol, bpp;
+    uint8_t font_data;
+    unsigned int linesize, xorcol, bpp;
     int i;
     unsigned int fgcol, bgcol;
     DisplayState *ds = s->ds;
@@ -626,7 +627,7 @@ static void vga_putcharxy(TextConsole *s, int x, int y, int ch,
             font_data = *font_ptr++;
             if (t_attrib->uline
                 && ((i == FONT_HEIGHT - 2) || (i == FONT_HEIGHT - 3))) {
-                font_data = 0xFFFF;
+                font_data = 0xFF;
             }
             ((uint32_t *)d)[0] = (dmask16[(font_data >> 4)] & xorcol) ^ bgcol;
             ((uint32_t *)d)[1] = (dmask16[(font_data >> 0) & 0xf] & xorcol) ^ bgcol;
@@ -639,7 +640,7 @@ static void vga_putcharxy(TextConsole *s, int x, int y, int ch,
             font_data = *font_ptr++;
             if (t_attrib->uline
                 && ((i == FONT_HEIGHT - 2) || (i == FONT_HEIGHT - 3))) {
-                font_data = 0xFFFF;
+                font_data = 0xFF;
             }
             ((uint32_t *)d)[0] = (dmask4[(font_data >> 6)] & xorcol) ^ bgcol;
             ((uint32_t *)d)[1] = (dmask4[(font_data >> 4) & 3] & xorcol) ^ bgcol;
@@ -652,7 +653,7 @@ static void vga_putcharxy(TextConsole *s, int x, int y, int ch,
         for(i = 0; i < FONT_HEIGHT; i++) {
             font_data = *font_ptr++;
             if (t_attrib->uline && ((i == FONT_HEIGHT - 2) || (i == FONT_HEIGHT - 3))) {
-                font_data = 0xFFFF;
+                font_data = 0xFF;
             }
             ((uint32_t *)d)[0] = (-((font_data >> 7)) & xorcol) ^ bgcol;
             ((uint32_t *)d)[1] = (-((font_data >> 6) & 1) & xorcol) ^ bgcol;
