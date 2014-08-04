@@ -124,7 +124,7 @@ static kbd_layout_t *parse_keyboard_layout(const char *language,
 		    char *rest2;
 		    int keycode = strtol(rest, &rest2, 0);
 
-		    if (rest && strstr(rest, "numlock")) {
+		    if (strstr(rest, "numlock")) {
 			add_to_key_range(&k->keypad_range, keycode);
 			add_to_key_range(&k->numlock_range, keysym);
 			//fprintf(stderr, "keypad keysym %04x keycode %d\n", keysym, keycode);
