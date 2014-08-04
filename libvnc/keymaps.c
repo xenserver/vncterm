@@ -92,6 +92,7 @@ static kbd_layout_t *parse_keyboard_layout(const char *language,
         return 0;
     /* Only called at start-of-day, so doesn't need privsep */
     if (!(f = fopen(file_name, "r"))) {
+	qemu_free(k);
 	fprintf(stderr,
 		"Could not read keymap file: '%s'\n", file_name);
 	return 0;
