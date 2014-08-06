@@ -598,7 +598,7 @@ static void usage(FILE *f)
     fprintf(f, "Usage: vncterm [OPTION]... [CMD] [ARG]...\n"
         "Provide VNC server from a terminal.\n"
         "\n"
-        "  -c, --cmd             enable command mode, execute a command given\n"
+        "  -c, --cmd             enable command mode, execute a given command\n"
         "  -h, --help            print this help\n"
         "  -l, --loadstate=FILE  load state from a file\n"
         "  -p, --pty=PTY         connect to a given pty\n"
@@ -606,7 +606,7 @@ static void usage(FILE *f)
         "  -s, --stay            do not exit when command exit\n"
         "  -S, --stay-root       do not drop root privileges\n"
         "  -t, --title=TITLE     set VNC title\n"
-        "  -T, --text            provide telnet access also\n"
+        "  -T, --text            provide telnet access too\n"
         "  -v, --vnclisten       listen for VNC connection at a given address:port\n"
         "  -V, --vncviewer[=EXE] launch vncviewer \n"
         "  -x, --xenstore=PATH   write information at a given xenstore path\n"
@@ -722,6 +722,9 @@ main(int argc, char **argv, char **envp)
         case 'h':
             usage(stdout);
             return 0;
+        case '?':
+            usage(stderr);
+            return 1;
         }
     }
 
