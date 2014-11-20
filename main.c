@@ -101,6 +101,11 @@ enum privsep_opcode {
     privsep_op_statefile_completed
 };
 
+static int restart = 0;
+static int restart_needed = 1;
+static int exit_when_all_disconnect = 0;
+static int exit_on_sigchld = 1;
+
 static void _write_port_to_xenstore(struct xs_handle *xs, char *xenstore_path, char *type, int port);
 
 static int
@@ -302,9 +307,23 @@ run_process(CharDriverState *console, TextDisplayState *tds, mode_t mask,
     return p;
 }
 
+/* Close the process's fd and iohandler */
 static void
 end_process(struct process *p)
 {
+    struct iohandler *pioh = iohandlers;
+
+    while (pioh) {
+        if (pioh->fd == p->fd)
+            break;
+        pioh = pioh->next;
+    }
+    if (pioh) {
+        pioh->enabled = 0;
+        pioh->pollfd = NULL;
+        handlers_updated = 1;
+    }
+
     close(p->fd);
     free(p);
 }
@@ -312,6 +331,11 @@ end_process(struct process *p)
 static void
 handle_sigchld(int signo)
 {
+    if (restart)
+        restart_needed = 1;
+    else if (exit_on_sigchld)
+        exit_when_all_disconnect=1;
+
     wait(NULL);
     signal(SIGCHLD, handle_sigchld);
 }
@@ -635,11 +659,7 @@ main(int argc, char **argv, char **envp)
     char *statefile = NULL;
     char *vnclisten = NULL;
     char *vncvieweroptions = NULL;
-    int exit_on_eof = 1;
-    int restart = 0;
-    int restart_needed = 1;
     int cmd_mode = 0;
-    int exit_when_all_disconnect = 0;
     int stay_root = 0;
     int vncviewer = 0;
     int enable_textterm = 0;
@@ -696,7 +716,7 @@ main(int argc, char **argv, char **envp)
 	    restart = 1;
 	    break;
 	case 's':
-	    exit_on_eof = 0;
+	    exit_on_sigchld = 0;
 	    break;
 	case 't':
 	    title = strdup(optarg);
@@ -1157,12 +1177,12 @@ main(int argc, char **argv, char **envp)
 #endif
 		if (revents == 0)
 		    continue;
-		if (revents & (POLLERR|POLLHUP|POLLNVAL)) {
+		if (revents & (POLLERR|POLLNVAL)) {
 		    if (ioh->fd == console_input_fd(vncterm->console)) {
                 ds->dpy_close_vncviewer_connections(ds);
 			if (restart)
 			    restart_needed = 1;
-			else if (exit_on_eof)
+			else if (exit_on_sigchld)
 			    exit_when_all_disconnect=1;
 		    }
 		    if (ioh->fd_error)
