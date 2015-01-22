@@ -1,0 +1,12 @@
+[Unit]
+Description=vncterm for dom0
+Requires=xenstored.socket
+After=xenstored.socket
+
+[Service]
+Environment=TERM=linux
+ExecStart=/opt/xensource/libexec/vncterm-wrapper 0 -v 127.0.0.1:0 -r -x /local/domain/0/console -T -c /opt/xensource/libexec/dom0term.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

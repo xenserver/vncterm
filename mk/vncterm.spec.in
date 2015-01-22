@@ -7,7 +7,10 @@ Group: System/Hypervisor
 Source0: %{name}-%{version}.tar.bz2
 Patch0: %{name}-development.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: xen-dom0-libs-devel
+BuildRequires: xen-dom0-libs-devel systemd
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
 
 %description
 This package contains the vncterm utility
@@ -22,17 +25,31 @@ This package contains the vncterm utility
 rm -rf $RPM_BUILD_ROOT
 mkdir -p ${RPM_BUILD_ROOT}%{_libdir}/xen/bin
 mkdir -p ${RPM_BUILD_ROOT}/opt/xensource/libexec
+mkdir -p ${RPM_BUILD_ROOT}/usr/lib/systemd/system
 cp vncterm ${RPM_BUILD_ROOT}%{_libdir}/xen/bin/vncterm
 cp dom0term/dom0term.sh ${RPM_BUILD_ROOT}/opt/xensource/libexec
+cp dom0term/vncterm-wrapper ${RPM_BUILD_ROOT}/opt/xensource/libexec
+cp dom0term/dom0term.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
 mkdir -p ${RPM_BUILD_ROOT}%{_datadir}/xen/qemu
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+%systemd_post dom0term.service
+
+%preun
+%systemd_preun dom0term.service
+
+%postun
+%systemd_postun_with_restart dom0term.service
 
 %files
 %defattr(-,root,root,-)
 %doc
 %{_libdir}/xen/bin/vncterm
 /opt/xensource/libexec/dom0term.sh
+/opt/xensource/libexec/vncterm-wrapper
+%{_unitdir}/dom0term.service
 
 %changelog
