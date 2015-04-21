@@ -7,6 +7,7 @@ After=xenstored.socket
 Environment=TERM=linux
 ExecStart=/opt/xensource/libexec/vncterm-wrapper 0 -v 127.0.0.1:0 -r -x /local/domain/0/console -T -c /opt/xensource/libexec/dom0term.sh
 Restart=always
+Type=idle
 
 [Install]
 WantedBy=multi-user.target
