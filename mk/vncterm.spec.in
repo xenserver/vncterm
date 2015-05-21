@@ -8,6 +8,7 @@ Source0: %{name}-%{version}.tar.bz2
 Patch0: %{name}-development.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: xen-dom0-libs-devel systemd
+Requires(pre): shadow-utils
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -30,10 +31,23 @@ cp vncterm ${RPM_BUILD_ROOT}%{_libdir}/xen/bin/vncterm
 cp dom0term/dom0term.sh ${RPM_BUILD_ROOT}/opt/xensource/libexec
 cp dom0term/vncterm-wrapper ${RPM_BUILD_ROOT}/opt/xensource/libexec
 cp dom0term/dom0term.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system
-mkdir -p ${RPM_BUILD_ROOT}%{_datadir}/xen/qemu
+mkdir -p ${RPM_BUILD_ROOT}%{_var}/xen/vncterm
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%pre
+/usr/bin/getent passwd vncterm >/dev/null 2>&1 || /usr/sbin/useradd \
+    -M -U -r \
+    -s /sbin/nologin \
+    -d / \
+    vncterm >/dev/null 2>&1 || :
+/usr/bin/getent passwd vncterm_base >/dev/null 2>&1 || /usr/sbin/useradd \
+    -M -U -r \
+    -s /sbin/nologin \
+    -d / \
+    -u 131072 \
+    vncterm_base >/dev/null 2>&1 || :
 
 %post
 %systemd_post dom0term.service
@@ -51,5 +65,6 @@ rm -rf $RPM_BUILD_ROOT
 /opt/xensource/libexec/dom0term.sh
 /opt/xensource/libexec/vncterm-wrapper
 %{_unitdir}/dom0term.service
+%dir %{_var}/xen/vncterm
 
 %changelog
