@@ -50,6 +50,7 @@ rm -rf $RPM_BUILD_ROOT
     vncterm_base >/dev/null 2>&1 || :
 
 %post
+grep -xq 'pts/0' /etc/securetty || echo 'pts/0' >>/etc/securetty
 %systemd_post dom0term.service
 
 %preun

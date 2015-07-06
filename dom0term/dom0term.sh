@@ -1,7 +1,5 @@
 #! /bin/bash
 
-read -s -p "Press <Enter> to login
-" ignore
 clear
-exec /bin/login -f root
-
+cat /etc/issue
+exec /bin/login root
