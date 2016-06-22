@@ -7,7 +7,7 @@ Group: System/Hypervisor
 Source0: %{name}-%{version}.tar.bz2
 Patch0: %{name}-development.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: xen-dom0-libs-devel systemd
+BuildRequires: xen-libs-devel systemd
 Requires(pre): shadow-utils
 Requires(post): systemd
 Requires(preun): systemd
